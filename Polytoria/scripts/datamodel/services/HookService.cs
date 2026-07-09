@@ -5,6 +5,7 @@
 using Godot;
 using Polytoria.Attributes;
 using Polytoria.Scripting;
+using Polytoria.Datamodel;
 
 namespace Polytoria.Datamodel.Services;
 
@@ -19,6 +20,30 @@ public sealed partial class HookService : Instance
 	public PTSignal<double> PostRendered { get; private set; } = new();
 	[ScriptProperty]
 	public PTSignal<double> PhysicsUpdated { get; private set; } = new();
+
+	/// <summary>
+	/// Returns whether the current session is running on the server.
+	/// </summary>
+	[ScriptProperty]
+	public bool IsServer => Root.Network?.IsServer ?? false;
+
+	/// <summary>
+	/// Returns whether the current session is running on the client.
+	/// </summary>
+	[ScriptProperty]
+	public bool IsClient => Root.SessionType == World.SessionTypeEnum.Client && !IsServer;
+
+	/// <summary>
+	/// Returns whether the current session is running on the creator.
+	/// </summary>
+	[ScriptProperty]
+	public bool IsCreator => Root.SessionType == World.SessionTypeEnum.Creator;
+
+	/// <summary>
+	/// Returns whether the current session is being tested locally.
+	/// </summary>
+	[ScriptProperty]
+	public bool IsLocalTest => Root.WorldID == 0;
 
 	public override void Init()
 	{
