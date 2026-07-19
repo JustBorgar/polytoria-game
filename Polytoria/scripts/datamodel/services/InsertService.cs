@@ -61,23 +61,40 @@ public sealed partial class InsertService : Instance
 		ptm.Animator?.SetNetworkAuthority(owner, false);
 
 		// Jump sound
-		BuiltInAudioAsset audio = New<BuiltInAudioAsset>();
-		audio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Jump;
+		BuiltInAudioAsset jumpAudio = New<BuiltInAudioAsset>();
+		jumpAudio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Jump;
+
 		var jumpSound = New<Sound>();
 		jumpSound.Name = "JumpSound";
-		jumpSound.Parent = npc;
 		jumpSound.Volume = 0.5f;
-		jumpSound.Audio = audio;
+		jumpSound.Audio = jumpAudio;
 		jumpSound.Autoplay = false;
 		jumpSound.Loop = false;
 		jumpSound.PlayInWorld = true;
 		jumpSound.SetNetworkAuthority(owner, false);
-
-		npc.JumpSound = jumpSound;
-
 		jumpSound.LocalPosition = Vector3.Zero;
 		jumpSound.LocalRotation = Vector3.Zero;
 		jumpSound.LocalSize = Vector3.One;
+		jumpSound.Parent = npc;
+		npc.JumpSound = jumpSound;
+
+		// Footstep sound
+		BuiltInAudioAsset footstepAudio = New<BuiltInAudioAsset>();
+		footstepAudio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.FootstepPlastic;
+
+		Sound footstepSound = New<Sound>();
+		footstepSound.Name = "FootstepSound";
+		footstepSound.Volume = 0.5f;
+		footstepSound.Audio = footstepAudio;
+		footstepSound.Autoplay = false;
+		footstepSound.Loop = false;
+		footstepSound.PlayInWorld = true;
+		footstepSound.SetNetworkAuthority(owner, false);
+		footstepSound.LocalPosition = Vector3.Zero;
+		footstepSound.LocalRotation = Vector3.Zero;
+		footstepSound.LocalSize = Vector3.One;
+		footstepSound.Parent = npc;
+		npc.FootstepSound = footstepSound;
 	}
 
 	[ScriptMethod]

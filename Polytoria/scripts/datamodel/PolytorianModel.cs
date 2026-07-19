@@ -23,7 +23,7 @@ public sealed partial class PolytorianModel : CharacterModel
 	private const double NetLookBlendUpdateInterval = 0.1;
 	private double _lastNetUpdateTime = 0.0;
 
-	private static readonly BoxShape3D _collisionBox = new() { Size = new(2f, 5.8f, 1f) };
+	private static readonly CapsuleShape3D _collisionCapsule = new() { Radius = 0.75f, Height = 5.8f };
 	internal Node3D? CollisionPivot;
 	internal CollisionShape3D? CollisionShape;
 	private Physical? _oldPhyParent;
@@ -49,6 +49,18 @@ public sealed partial class PolytorianModel : CharacterModel
 
 	internal Skeleton3D Skeleton = null!;
 	internal AnimationTree AnimTree = null!;
+
+	private bool _charIKInit = false;
+	private CharacterIKModifier? _charIK;
+	private float _targetStrafeX = 0f;
+	private float _targetStrafeY = 0f;
+	private float _currentStrafeX = 0f;
+	private float _currentStrafeY = 0f;
+	private const float DirectionalBlendSpeed = 8f;
+
+	private float _idleTimer = 0f;
+	private const float IdleVariantDelay = 10f;
+	private const float IdleVariantWeight = 0.6f;
 
 	private static readonly Shader _limbShader = GD.Load<Shader>("res://resources/shaders/character/limb.gdshader");
 	private static readonly Shader _transparentLimbShader = GD.Load<Shader>("res://resources/shaders/character/limb_transparent.gdshader");
@@ -306,7 +318,7 @@ public sealed partial class PolytorianModel : CharacterModel
 			};
 			CollisionShape = new()
 			{
-				Shape = _collisionBox
+				Shape = _collisionCapsule
 			};
 			Physical.SetRemoteLinkOffset(CollisionShape, new(0, 3f - 0.1f, 0));
 			Physical.SetRemoteLinkTarget(CollisionShape, CollisionPivot);
@@ -391,11 +403,62 @@ public sealed partial class PolytorianModel : CharacterModel
 	{
 		base.Process(delta);
 
+		if (Parent is NPC npcIdle)
+		{
+			bool isIdle = new Vector2(npcIdle.CharacterVelocity.X, npcIdle.CharacterVelocity.Z).Length() < 0.5f && npcIdle.IsOnGround && !npcIdle.IsDead;
+			if (isIdle)
+			{
+				_idleTimer += (float)delta;
+			}
+			else
+			{
+				_idleTimer = 0f;
+			}
+
+			bool triggerVariant = _idleTimer >= IdleVariantDelay;
+			if (triggerVariant) _idleTimer = 0f;
+
+			float roll = triggerVariant ? GD.Randf() : -1f;
+			_helper.PanicFall = npcIdle.IsPanicFalling;
+			_helper.JustJumped = npcIdle.JustJumped;
+			_helper.Idle2 = triggerVariant && roll < IdleVariantWeight;
+			_helper.Idle3 = triggerVariant && roll >= IdleVariantWeight;
+		}
+
+		if (!_charIKInit && Parent is Player plr && plr.IsLocal)
+		{
+			_charIKInit = true;
+			_charIK = new()
+			{
+				UpperLegBoneL = GDNode.GetNode<BoneAttachment3D>("Character/Poly/Skeleton3D/O_UpperLeg_L").BoneName,
+				UpperLegBoneR = GDNode.GetNode<BoneAttachment3D>("Character/Poly/Skeleton3D/O_UpperLeg_R").BoneName,
+				LowerLegBoneL = GDNode.GetNode<BoneAttachment3D>("Character/Poly/Skeleton3D/O_LowerLeg_L").BoneName,
+				LowerLegBoneR = GDNode.GetNode<BoneAttachment3D>("Character/Poly/Skeleton3D/O_LowerLeg_R").BoneName,
+				FootOffsetL = GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_L/LeftFootAttachment").Position.Length(),
+				FootOffsetR = GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_R/RightFootAttachment").Position.Length(),
+				SelfExclude = plr.CharBody3D.GetRid()
+			};
+			Skeleton.AddChild(_charIK);
+		}
+
+		if (_charIK != null && Parent is NPC npc)
+		{
+			_charIK.CurrentHorizontalSpeed = new Vector2(npc.CharacterVelocity.X, npc.CharacterVelocity.Z).Length();
+			_charIK.IsActive = npc.IsOnGround && !npc.IsDead && !npc.IsSitting && !(npc is Player plrForFootIk && plrForFootIk.IsClimbing);
+		}
+
 		if (_updateClothDirty)
 		{
 			_updateClothDirty = false;
 			UpdateClothMaterials();
 		}
+
+		_currentStrafeX = Mathf.Lerp(_currentStrafeX, _targetStrafeX, MathUtils.ExpDecay((float)delta, DirectionalBlendSpeed));
+		_currentStrafeY = Mathf.Lerp(_currentStrafeY, _targetStrafeY, MathUtils.ExpDecay((float)delta, DirectionalBlendSpeed));
+
+		Vector2 blendPos = new(_currentStrafeX, _currentStrafeY);
+		AnimTree?.Set("parameters/StateMachine/WalkRun/Walk/blend_position", blendPos);
+		AnimTree?.Set("parameters/StateMachine/WalkRun/Run/blend_position", blendPos);
 
 		foreach (KeyValuePair<string, float> kvp in _blendTargets)
 		{
@@ -610,6 +673,8 @@ public sealed partial class PolytorianModel : CharacterModel
 			CharacterAttachmentEnum.LegRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_UpperLeg_R/RightLegAttachment"),
 			CharacterAttachmentEnum.KneeLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_L/LeftKneeAttachment"),
 			CharacterAttachmentEnum.KneeRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_R/RightKneeAttachment"),
+			CharacterAttachmentEnum.FootLeft => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_L/LeftFootAttachment"),
+			CharacterAttachmentEnum.FootRight => GDNode.GetNode<Node3D>("Character/Poly/Skeleton3D/O_LowerLeg_R/RightFootAttachment"),
 			_ => throw new NotImplementedException(),
 		};
 
@@ -636,6 +701,12 @@ public sealed partial class PolytorianModel : CharacterModel
 			case CharacterModelBlendEnum.LookY:
 				propName = "parameters/LookYAdd/add_amount";
 				break;
+			case CharacterModelBlendEnum.StrafeX:
+				_targetStrafeX = blendValue;
+				return;
+			case CharacterModelBlendEnum.StrafeY:
+				_targetStrafeY = blendValue;
+				return;
 		}
 
 		if (propName != "")

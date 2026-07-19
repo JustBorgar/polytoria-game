@@ -31,6 +31,8 @@ public sealed partial class Player : NPC
 	public const string BadgeImageDirPath = "res://assets/textures/client/ui/playerlist/badges/";
 	private static readonly Dictionary<string, string> _badgePathCache = [];
 	private bool _isReady = false;
+	private static float ClimbPushSpeed = 75.0f;
+	private static float ClimbJumpCooldown = 0.6f;
 	internal bool ClimbDebounce = false;
 	internal bool JustFinishedClimbing = false;
 	internal bool IsMoving = false;
@@ -668,15 +670,16 @@ public sealed partial class Player : NPC
 		if (FootFwdRaycast.IsColliding())
 		{
 			Node collider = (Node)FootFwdRaycast.GetCollider();
-			if (collider != null && GetNetObjFromProxy(collider) is Truss truss)
+			Vector3 hitNormal = FootFwdRaycast.GetCollisionNormal(); //Prevents climbing from triggering while grounded on top of a truss
+			bool facingClimbableSurface = hitNormal.AngleTo(Vector3.Up) > Mathf.DegToRad(45f);
+			if (collider != null && facingClimbableSurface && GetNetObjFromProxy(collider) is Truss truss)
 			{
 				if (!IsClimbing)
 				{
-					if (!ClimbDebounce)
+					if (!ClimbDebounce && ClimbJumpCooldownRemaining <= 0f)
 					{
 						ClimbingTruss = truss;
 						IsClimbing = true;
-						Character?.PlayClimb();
 					}
 
 				}
@@ -745,7 +748,6 @@ public sealed partial class Player : NPC
 		IsClimbing = false;
 		JustFinishedClimbing = true;
 		ClimbingTruss = null;
-		Character?.SetAnimSpeed(1);
 	}
 
 	private void SendPing()
@@ -916,11 +918,25 @@ public sealed partial class Player : NPC
 
 	public override void Jump()
 	{
+		bool wasClimbing = IsClimbing;
+		if (wasClimbing && ClimbJumpCooldownRemaining > 0f) return;
+
+		Vector3? pushDir = wasClimbing && ClimbingTruss != null ? (GetGlobalPosition() - ClimbingTruss.GetGlobalPosition()).Normalized() with { Y = 0 } : null;
+
 		base.Jump();
-		if (IsClimbing)
+
+		if (wasClimbing)
 		{
 			EndClimb();
 			ClimbDebounce = true;
+			ClimbJumpCooldownRemaining = ClimbJumpCooldown;
+
+			if (pushDir.HasValue && pushDir.Value.LengthSquared() > 0.0001f)
+			{
+				Vector3 dir = pushDir.Value.Normalized();
+				CharacterVelocity.X = dir.X * ClimbPushSpeed;
+				CharacterVelocity.Z = dir.Z * ClimbPushSpeed;
+			}
 		}
 	}
 
