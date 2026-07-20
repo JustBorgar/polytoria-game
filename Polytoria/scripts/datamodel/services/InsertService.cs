@@ -78,23 +78,60 @@ public sealed partial class InsertService : Instance
 		jumpSound.Parent = npc;
 		npc.JumpSound = jumpSound;
 
-		// Footstep sound
-		BuiltInAudioAsset footstepAudio = New<BuiltInAudioAsset>();
-		footstepAudio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.FootstepPlastic;
+		// Fall Sound
+		BuiltInAudioAsset fallAudio = New<BuiltInAudioAsset>();
+		fallAudio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Fall;
 
-		Sound footstepSound = New<Sound>();
-		footstepSound.Name = "FootstepSound";
-		footstepSound.Volume = 0.5f;
-		footstepSound.Audio = footstepAudio;
-		footstepSound.Autoplay = false;
-		footstepSound.Loop = false;
-		footstepSound.PlayInWorld = true;
-		footstepSound.SetNetworkAuthority(owner, false);
-		footstepSound.LocalPosition = Vector3.Zero;
-		footstepSound.LocalRotation = Vector3.Zero;
-		footstepSound.LocalSize = Vector3.One;
-		footstepSound.Parent = npc;
-		npc.FootstepSound = footstepSound;
+		Sound fallSound = New<Sound>();
+		fallSound.Name = "FallSound";
+		fallSound.Volume = 0.5f;
+		fallSound.Audio = fallAudio;
+		fallSound.Autoplay = false;
+		fallSound.Loop = true;
+		fallSound.PlayInWorld = true;
+		fallSound.SetNetworkAuthority(owner, false);
+		fallSound.LocalPosition = Vector3.Zero;
+		fallSound.LocalRotation = Vector3.Zero;
+		fallSound.LocalSize = Vector3.One;
+		fallSound.Parent = npc;
+		npc.FallSound = fallSound;
+
+		// Land Sound
+		BuiltInAudioAsset landAudio = New<BuiltInAudioAsset>();
+		landAudio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.Land;
+
+		Sound landSound = New<Sound>();
+		landSound.Name = "LandSound";
+		landSound.Volume = 0.5f;
+		landSound.Audio = landAudio;
+		landSound.Autoplay = false;
+		landSound.Loop = false;
+		landSound.PlayInWorld = true;
+		landSound.SetNetworkAuthority(owner, false);
+		landSound.LocalPosition = Vector3.Zero;
+		landSound.LocalRotation = Vector3.Zero;
+		landSound.LocalSize = Vector3.One;
+		landSound.Parent = npc;
+		npc.LandSound = landSound;
+
+
+		// Walk sound
+		BuiltInAudioAsset walkAudio = New<BuiltInAudioAsset>();
+		walkAudio.AudioPreset = BuiltInAudioAsset.BuiltInAudioPresetEnum.FootstepPlastic;
+
+		Sound walkSound = New<Sound>();
+		walkSound.Name = "WalkSound";
+		walkSound.Volume = 0.5f;
+		walkSound.Audio = walkAudio;
+		walkSound.Autoplay = false;
+		walkSound.Loop = false;
+		walkSound.PlayInWorld = true;
+		walkSound.SetNetworkAuthority(owner, false);
+		walkSound.LocalPosition = Vector3.Zero;
+		walkSound.LocalRotation = Vector3.Zero;
+		walkSound.LocalSize = Vector3.One;
+		walkSound.Parent = npc;
+		npc.WalkSound = walkSound;
 	}
 
 	[ScriptMethod]

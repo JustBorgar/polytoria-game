@@ -33,7 +33,6 @@ public sealed partial class Player : NPC
 	private bool _isReady = false;
 	private static float ClimbPushSpeed = 75.0f;
 	private static float ClimbJumpCooldown = 0.6f;
-	internal bool ClimbDebounce = false;
 	internal bool JustFinishedClimbing = false;
 	internal bool IsMoving = false;
 	internal IPlayerMovement? PlayerMovement;
@@ -676,7 +675,7 @@ public sealed partial class Player : NPC
 			{
 				if (!IsClimbing)
 				{
-					if (!ClimbDebounce && ClimbJumpCooldownRemaining <= 0f)
+					if (ClimbJumpCooldownRemaining <= 0f)
 					{
 						ClimbingTruss = truss;
 						IsClimbing = true;
@@ -928,7 +927,6 @@ public sealed partial class Player : NPC
 		if (wasClimbing)
 		{
 			EndClimb();
-			ClimbDebounce = true;
 			ClimbJumpCooldownRemaining = ClimbJumpCooldown;
 
 			if (pushDir.HasValue && pushDir.Value.LengthSquared() > 0.0001f)
@@ -1065,6 +1063,9 @@ public sealed partial class Player : NPC
 		UseBubbleChat = Root.PlayerDefaults.UseBubbleChat;
 		AutoLoadAppearance = Root.PlayerDefaults.AutoLoadAppearance;
 		MovementMode = Root.PlayerDefaults.MovementMode;
+
+		Character?.Animator?.StopAnimation();
+		Character?.Animator?.StopOneShotAnimation();
 
 		if (Character is PolytorianModel ptmodel)
 		{

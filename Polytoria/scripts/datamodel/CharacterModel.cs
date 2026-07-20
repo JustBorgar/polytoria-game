@@ -36,7 +36,8 @@ public partial class CharacterModel : Dynamic
 		LookX,
 		LookY,
 		StrafeX,
-		StrafeY
+		StrafeY,
+		ClimbSpeed
 	}
 
 	[ScriptProperty, SyncVar(AllowAuthorWrite = true)]

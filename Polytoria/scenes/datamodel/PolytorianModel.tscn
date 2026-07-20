@@ -4934,7 +4934,7 @@ state_machine_type = 1
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_dpcmo"]
 resource_local_to_scene = true
-graph_offset = Vector2(-303.55832, 39.810455)
+graph_offset = Vector2(-275.53558, 75.47066)
 nodes/output/position = Vector2(320, 140)
 nodes/DynState/node = SubResource("AnimationNodeStateMachine_dpcmo")
 nodes/DynState/position = Vector2(-60, 140)
@@ -4954,8 +4954,19 @@ filters = ["Poly/Polytorian/Skeleton3D:Head_2", "Poly/Polytorian/Skeleton3D:Lowe
 
 [sub_resource type="AnimationNodeBlend2" id="AnimationNodeBlend2_bh3ai"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_2unpt"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qevpx"]
 animation = &"Climb"
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_ptphf"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_0dh81"]
+graph_offset = Vector2(-444.3191, 39.30591)
+nodes/output/position = Vector2(290, 160)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_qevpx")
+nodes/Animation/position = Vector2(-90, 140)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_ptphf")
+nodes/TimeScale/position = Vector2(100, 130)
+node_connections = [&"output", 0, &"TimeScale", &"TimeScale", 0, &"Animation"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_l31xv"]
 animation = &"Idle"
@@ -5023,6 +5034,7 @@ animation = &"Jump"
 animation = &"PanicFall"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_byx27"]
+xfade_time = 0.1
 advance_mode = 2
 advance_expression = "JustJumped"
 
@@ -5062,6 +5074,7 @@ advance_mode = 2
 advance_expression = "!PanicFall"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_dpcmo"]
+xfade_time = 0.1
 advance_mode = 2
 advance_expression = "!JustJumped"
 
@@ -5199,35 +5212,15 @@ states/Walk/position = Vector2(441, 53)
 transitions = ["Start", "Walk", SubResource("AnimationNodeStateMachineTransition_qhhr7"), "Walk", "End", SubResource("AnimationNodeStateMachineTransition_81qhk"), "Run", "End", SubResource("AnimationNodeStateMachineTransition_ko7xs"), "Start", "Run", SubResource("AnimationNodeStateMachineTransition_bpufh"), "Walk", "Run", SubResource("AnimationNodeStateMachineTransition_5girq"), "Run", "Walk", SubResource("AnimationNodeStateMachineTransition_4muji")]
 graph_offset = Vector2(0.09862042, 5.8121204)
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0wxqo"]
-xfade_time = 0.4
-advance_mode = 2
-advance_expression = "StateClimbing"
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bh3ai"]
-xfade_time = 0.2
-advance_mode = 2
-advance_expression = "!StateClimbing && (StateWalking || StateRunning)"
-
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ltuxp"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "StateJumping"
+advance_expression = "StateJumping && !(StateIdle || StateClimbing || StateWalking || StateRunning)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_2wf5n"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "!StateJumping && (StateWalking || StateRunning)"
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_nak18"]
-xfade_time = 0.2
-advance_mode = 2
-advance_expression = "!StateClimbing && StateJumping"
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_22sfn"]
-xfade_time = 0.2
-advance_mode = 2
-advance_expression = "StateClimbing"
+advance_expression = "(StateWalking || StateRunning) && !(StateIdle || StateClimbing || StateJumping)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_b4yva"]
 advance_mode = 2
@@ -5235,36 +5228,56 @@ advance_mode = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ffs0u"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "StateJumping"
+advance_expression = "StateJumping && !(StateWalking || StateRunning || StateClimbing || StateIdle)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0vr36"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "StateIdle"
+advance_expression = "StateIdle && !(StateWalking || StateRunning || StateClimbing || StateJumping)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_xetdo"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "StateWalking || StateRunning"
+advance_expression = "(StateWalking || StateRunning) && !(StateJumping || StateClimbing || StateIdle)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_k855x"]
 xfade_time = 0.4
 advance_mode = 2
-advance_expression = "!StateWalking && !StateRunning"
+advance_expression = "StateIdle && !(StateJumping || StateClimbing || StateWalking || StateRunning)"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_22sfn"]
+xfade_time = 0.2
+advance_mode = 2
+advance_expression = "StateClimbing && !(StateWalking || StateRunning || StateIdle || StateJumping)"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_nak18"]
+xfade_time = 0.2
+advance_mode = 2
+advance_expression = "StateJumping && !(StateWalking || StateRunning || StateIdle || StateClimbing)"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bh3ai"]
+xfade_time = 0.2
+advance_mode = 2
+advance_expression = "(StateWalking || StateRunning) && !(StateJumping || StateIdle || StateClimbing)"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_0wxqo"]
+xfade_time = 0.4
+advance_mode = 2
+advance_expression = "StateClimbing && !(StateIdle || StateJumping || StateWalking || StateRunning)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_onddc"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "StateClimbing"
+advance_expression = "StateClimbing && !(StateJumping || StateWalking || StateRunning || StateIdle)"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_b75bp"]
 xfade_time = 0.2
 advance_mode = 2
-advance_expression = "StateIdle"
+advance_expression = "StateIdle && !(StateWalking || StateRunning || StateJumping || StateClimbing)"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_xetdo"]
-states/Climbing/node = SubResource("AnimationNodeAnimation_2unpt")
-states/Climbing/position = Vector2(631, 232)
+states/Climb/node = SubResource("AnimationNodeBlendTree_0dh81")
+states/Climb/position = Vector2(629.9133, 230.67482)
 states/Idle/node = SubResource("AnimationNodeStateMachine_is6n2")
 states/Idle/position = Vector2(393.40674, 99.45197)
 states/JumpFall/node = SubResource("AnimationNodeStateMachine_onddc")
@@ -5272,14 +5285,14 @@ states/JumpFall/position = Vector2(631, 100)
 states/Start/position = Vector2(191, 100)
 states/WalkRun/node = SubResource("AnimationNodeStateMachine_2ao77")
 states/WalkRun/position = Vector2(393, 232)
-transitions = ["WalkRun", "Climbing", SubResource("AnimationNodeStateMachineTransition_0wxqo"), "Climbing", "WalkRun", SubResource("AnimationNodeStateMachineTransition_bh3ai"), "WalkRun", "JumpFall", SubResource("AnimationNodeStateMachineTransition_ltuxp"), "JumpFall", "WalkRun", SubResource("AnimationNodeStateMachineTransition_2wf5n"), "Climbing", "JumpFall", SubResource("AnimationNodeStateMachineTransition_nak18"), "JumpFall", "Climbing", SubResource("AnimationNodeStateMachineTransition_22sfn"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_b4yva"), "Idle", "JumpFall", SubResource("AnimationNodeStateMachineTransition_ffs0u"), "JumpFall", "Idle", SubResource("AnimationNodeStateMachineTransition_0vr36"), "Idle", "WalkRun", SubResource("AnimationNodeStateMachineTransition_xetdo"), "WalkRun", "Idle", SubResource("AnimationNodeStateMachineTransition_k855x"), "Idle", "Climbing", SubResource("AnimationNodeStateMachineTransition_onddc"), "Climbing", "Idle", SubResource("AnimationNodeStateMachineTransition_b75bp")]
-graph_offset = Vector2(99.62697, 57.849644)
+transitions = ["WalkRun", "JumpFall", SubResource("AnimationNodeStateMachineTransition_ltuxp"), "JumpFall", "WalkRun", SubResource("AnimationNodeStateMachineTransition_2wf5n"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_b4yva"), "Idle", "JumpFall", SubResource("AnimationNodeStateMachineTransition_ffs0u"), "JumpFall", "Idle", SubResource("AnimationNodeStateMachineTransition_0vr36"), "Idle", "WalkRun", SubResource("AnimationNodeStateMachineTransition_xetdo"), "WalkRun", "Idle", SubResource("AnimationNodeStateMachineTransition_k855x"), "JumpFall", "Climb", SubResource("AnimationNodeStateMachineTransition_22sfn"), "Climb", "JumpFall", SubResource("AnimationNodeStateMachineTransition_nak18"), "Climb", "WalkRun", SubResource("AnimationNodeStateMachineTransition_bh3ai"), "WalkRun", "Climb", SubResource("AnimationNodeStateMachineTransition_0wxqo"), "Idle", "Climb", SubResource("AnimationNodeStateMachineTransition_onddc"), "Climb", "Idle", SubResource("AnimationNodeStateMachineTransition_b75bp")]
+graph_offset = Vector2(28.277803, 51.908127)
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_2unpt"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_2ao77"]
 resource_local_to_scene = true
-graph_offset = Vector2(-479.7854, 65.689804)
+graph_offset = Vector2(-500.8402, -9.043213)
 nodes/output/position = Vector2(2120, 140)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_xetdo")
 nodes/StateMachine/position = Vector2(-180, 140)
@@ -5601,11 +5614,11 @@ transform = Transform3D(1.0000279, 4.8815938e-08, -2.3283064e-09, 7.869676e-08, 
 shape = SubResource("CapsuleShape3D_0wxqo")
 
 [node name="Physical Bone LowerArm_R" type="PhysicalBone3D" parent="Character/Poly/Skeleton3D/RagdollBone" unique_id=1090949727]
-transform = Transform3D(1.0286907e-07, -1.9318515, 0.51763874, -1.4821175e-07, 0.51763874, 1.9318515, -2, -1.3772396e-07, -1.1653704e-07, -1.6949673, 6.48083, 1.3291609e-07)
+transform = Transform3D(1.0286907e-07, -1.9318515, 0.51763874, -1.4821175e-07, 0.51763874, 1.9318515, -2, -1.3772396e-07, -1.1653704e-07, -1.6949673, 6.48083, 1.3291606e-07)
 joint_type = 3
-joint_offset = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 3.2148527e-08, -5.5967274e-07, 0.35783297)
+joint_offset = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 3.2148513e-08, -5.5967274e-07, 0.35783297)
 joint_rotation = Vector3(1.5707964, 0, 0)
-body_offset = Transform3D(2.0000002, 1.8335876e-07, -1.3113279e-08, 3.5527137e-14, -5.364418e-07, -2.0000002, -1.4901175e-08, 2.0000002, -5.364418e-07, -5.96046e-08, 0.715666, 1.3113022e-06)
+body_offset = Transform3D(2.0000002, 1.8335876e-07, -1.3113279e-08, 3.5527137e-14, -5.364418e-07, -2.0000002, -1.4901175e-08, 2.0000002, -5.364418e-07, -5.960457e-08, 0.715666, 1.3113022e-06)
 mass = 8.0
 bounce = 0.5
 gravity_scale = 3.2
@@ -5622,10 +5635,10 @@ transform = Transform3D(1, 0, -9.30811e-13, 0, -1.6233272e-15, 1, 0, -1, 1.62330
 shape = SubResource("CapsuleShape3D_bh3ai")
 
 [node name="Physical Bone UpperArm_L" type="PhysicalBone3D" parent="Character/Poly/Skeleton3D/RagdollBone" unique_id=267629112]
-transform = Transform3D(0.010224239, 1.9345555, -0.5073369, 0.0026813785, 0.5073298, 1.9345826, 1.9999721, -0.010569998, -1.07182785e-07, 1.2612841, 8.119518, -9.857375e-07)
+transform = Transform3D(0.010224239, 1.9345555, -0.5073369, 0.0026813785, 0.5073298, 1.9345826, 1.9999721, -0.010569998, -1.07182785e-07, 1.2612841, 8.119518, -9.838749e-07)
 joint_type = 2
-joint_offset = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7249486e-07, -7.4361486e-09, 0.48972297)
-body_offset = Transform3D(2.0000005, -1.8626451e-07, 1.2027975e-08, 2.3138824e-10, 5.903861e-08, -2.0000007, 1.4901161e-08, 2, 3.036878e-08, -9.5088035e-07, 0.9794463, 0)
+joint_offset = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7156354e-07, -7.4361486e-09, 0.48972297)
+body_offset = Transform3D(2.0000005, -1.8626451e-07, 1.2027975e-08, 2.3138824e-10, 5.903861e-08, -2.0000007, 1.4901161e-08, 2, 3.036878e-08, -9.490177e-07, 0.9794463, 0)
 mass = 8.0
 bounce = 0.5
 gravity_scale = 3.2
@@ -5681,10 +5694,10 @@ transform = Transform3D(0.9999904, -3.813766e-07, -2.30968e-07, -4.4703484e-07, 
 shape = SubResource("CapsuleShape3D_b75bp")
 
 [node name="Physical Bone UpperLeg_L" type="PhysicalBone3D" parent="Character/Poly/Skeleton3D/RagdollBone" unique_id=1796970478]
-transform = Transform3D(1.9948142, 0.0937235, -0.10923661, 0.111853905, -0.05416717, 1.996135, 0.09058386, -1.9970683, -0.05926839, 0.7968038, 4.8005605, 0.042441446)
+transform = Transform3D(1.9948142, 0.0937235, -0.10923663, 0.11185392, -0.05416717, 1.996135, 0.09058386, -1.9970683, -0.05926839, 0.7968038, 4.8005605, 0.04244144)
 joint_type = 2
-joint_offset = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9640144e-07, -4.639022e-07, 0.71610457)
-body_offset = Transform3D(1.9999939, -9.685755e-07, -2.8382055e-07, -3.0105002e-07, 4.172325e-07, -1.9999993, 9.611249e-07, 1.9999981, 4.0605664e-07, 5.9604645e-07, 1.4322087, 6.3702464e-07)
+joint_offset = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9106604e-07, -4.676275e-07, 0.71610457)
+body_offset = Transform3D(1.9999939, -9.685755e-07, -2.9872172e-07, -3.1595118e-07, 4.172325e-07, -1.9999993, 9.611249e-07, 1.9999981, 4.0605664e-07, 5.9604645e-07, 1.4322087, 6.444752e-07)
 mass = 8.0
 bounce = 0.5
 gravity_scale = 3.2
@@ -5700,11 +5713,11 @@ transform = Transform3D(0.9999904, -3.813766e-07, -2.30968e-07, -4.4703484e-07, 
 shape = SubResource("CapsuleShape3D_b75bp")
 
 [node name="Physical Bone LowerLeg_L" type="PhysicalBone3D" parent="Character/Poly/Skeleton3D/RagdollBone" unique_id=451617984]
-transform = Transform3D(1.9980766, 0.03984612, -0.07811795, 0.077040985, 0.053463157, 1.9978005, 0.04189051, -1.9988883, 0.05187685, 0.9309685, 1.9404874, 0.04773411)
+transform = Transform3D(1.9980766, 0.03984611, -0.07811794, 0.07704097, 0.053463157, 1.9978005, 0.041890502, -1.9988883, 0.05187685, 0.9309685, 1.9404874, 0.04773414)
 joint_type = 3
-joint_offset = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.0778522e-07, -3.3708451e-07, 0.7161046)
+joint_offset = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -1.13120635e-07, -3.2218333e-07, 0.7161046)
 joint_rotation = Vector3(0, 1.5707964, 0)
-body_offset = Transform3D(1.999994, -8.6426735e-07, -3.6484562e-07, -1.7567072e-07, 4.0605664e-07, -1.9999994, 1.0728836e-06, 1.9999983, 5.2526593e-07, 4.7683716e-07, 1.4322088, 2.9802322e-07)
+body_offset = Transform3D(1.999994, -8.7171793e-07, -3.4994446e-07, -1.6065314e-07, 4.0605664e-07, -1.9999994, 1.0803342e-06, 1.9999983, 5.2526593e-07, 4.7683716e-07, 1.4322088, 2.682209e-07)
 mass = 8.0
 bounce = 0.5
 gravity_scale = 3.2
@@ -5721,11 +5734,11 @@ transform = Transform3D(0.99998343, -4.4249464e-07, -4.414469e-07, -6.3329935e-0
 shape = SubResource("CapsuleShape3D_0vr36")
 
 [node name="Physical Bone LowerLeg_R" type="PhysicalBone3D" parent="Character/Poly/Skeleton3D/RagdollBone" unique_id=1434116845]
-transform = Transform3D(1.9980766, -0.039848216, 0.07811737, -0.077040344, 0.053463243, 1.9978005, -0.041892596, -1.9988881, 0.05187687, -0.93096673, 1.9404874, 0.04773412)
+transform = Transform3D(1.9980766, -0.03984822, 0.07811736, -0.07704034, 0.053463243, 1.9978005, -0.0418926, -1.9988881, 0.05187687, -0.93096673, 1.9404874, 0.04773415)
 joint_type = 3
-joint_offset = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.7808126e-07, -3.120648e-07, 0.71610457)
+joint_offset = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.754136e-07, -2.971636e-07, 0.71610457)
 joint_rotation = Vector3(0, 1.5707964, 0)
-body_offset = Transform3D(1.9999943, -1.2330711e-06, -2.1664891e-07, -4.0361192e-07, 3.9860606e-07, -1.9999994, 1.0244548e-06, 1.9999985, 5.1781535e-07, 1.3113022e-06, 1.4322088, 2.5331974e-07)
+body_offset = Transform3D(1.9999943, -1.2367964e-06, -2.240995e-07, -4.109461e-07, 3.9860606e-07, -1.9999994, 1.0281801e-06, 1.9999985, 5.1781535e-07, 1.3113022e-06, 1.4322088, 2.2351742e-07)
 mass = 8.0
 bounce = 0.5
 gravity_scale = 3.2
@@ -5780,6 +5793,7 @@ root_node = NodePath("../Character")
 tree_root = SubResource("AnimationNodeBlendTree_2ao77")
 advance_expression_base_node = NodePath("..")
 anim_player = NodePath("../Character/AnimationPlayer")
+parameters/StateMachine/Climb/TimeScale/scale = 1.0
 parameters/StateMachine/WalkRun/Run/blend_position = Vector2(0, 0)
 parameters/StateMachine/WalkRun/Walk/blend_position = Vector2(0, 0)
 parameters/GearHold_R/blend_amount = 0.0

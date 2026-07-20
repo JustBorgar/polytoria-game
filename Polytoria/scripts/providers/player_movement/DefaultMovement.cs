@@ -99,12 +99,6 @@ public class DefaultMovement : IPlayerMovement
 			moveDirection = snapshot.MoveDirection;
 			forwardInput = snapshot.ForwardInput;
 
-			// Handle jump
-			if (snapshot.Jump)
-			{
-				Target.Jump();
-			}
-
 			// Sprint/Stamina
 			if (sprinting && moveDirection != Vector3.Zero)
 			{
@@ -137,7 +131,9 @@ public class DefaultMovement : IPlayerMovement
 				Target.CharacterVelocity.Y = climbSpeed;
 
 				finalState = CharacterModel.CharacterModelStateEnum.Climbing;
-				Target.Character?.SetAnimSpeed(climbSpeed / 8);
+				//Target.Character?.SetAnimSpeed(climbSpeed / 8);
+				Target.Character?.SetAnimSpeed(1);
+				Target.Character?.SetBlendValue(CharacterModel.CharacterModelBlendEnum.ClimbSpeed, climbSpeed / 8);
 			}
 			else if (Target.JustFinishedClimbing)
 			{
@@ -202,15 +198,15 @@ public class DefaultMovement : IPlayerMovement
 				finalState = CharacterModel.CharacterModelStateEnum.Jumping;
 			}
 
-			// Remove debounce if touched the ground
-			if (Target.ClimbDebounce && isOnFloor)
-			{
-				Target.ClimbDebounce = false;
-			}
-
 			if (Target.IsClimbing && isOnFloor)
 			{
 				Target.EndClimb();
+			}
+
+			// Handle jump
+			if (snapshot.Jump)
+			{
+				Target.Jump();
 			}
 		}
 		else

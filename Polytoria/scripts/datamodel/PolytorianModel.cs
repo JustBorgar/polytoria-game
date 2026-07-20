@@ -453,12 +453,15 @@ public sealed partial class PolytorianModel : CharacterModel
 			UpdateClothMaterials();
 		}
 
-		_currentStrafeX = Mathf.Lerp(_currentStrafeX, _targetStrafeX, MathUtils.ExpDecay((float)delta, DirectionalBlendSpeed));
-		_currentStrafeY = Mathf.Lerp(_currentStrafeY, _targetStrafeY, MathUtils.ExpDecay((float)delta, DirectionalBlendSpeed));
+		if (Parent is Player)
+		{
+			_currentStrafeX = Mathf.Lerp(_currentStrafeX, _targetStrafeX, MathUtils.ExpDecay((float)delta, DirectionalBlendSpeed));
+			_currentStrafeY = Mathf.Lerp(_currentStrafeY, _targetStrafeY, MathUtils.ExpDecay((float)delta, DirectionalBlendSpeed));
 
-		Vector2 blendPos = new(_currentStrafeX, _currentStrafeY);
-		AnimTree?.Set("parameters/StateMachine/WalkRun/Walk/blend_position", blendPos);
-		AnimTree?.Set("parameters/StateMachine/WalkRun/Run/blend_position", blendPos);
+			Vector2 blendPos = new(_currentStrafeX, _currentStrafeY);
+			AnimTree?.Set("parameters/StateMachine/WalkRun/Walk/blend_position", blendPos);
+			AnimTree?.Set("parameters/StateMachine/WalkRun/Run/blend_position", blendPos);
+		}
 
 		foreach (KeyValuePair<string, float> kvp in _blendTargets)
 		{
@@ -619,6 +622,19 @@ public sealed partial class PolytorianModel : CharacterModel
 
 		Skeleton.AddChild(s);
 
+		// Copy player's current collision onto ragdoll
+		if (Parent is Physical parentPhysical)
+		{
+			foreach (Node child in s.GetChildren())
+			{
+				if (child is PhysicalBone3D bone)
+				{
+					bone.CollisionLayer = parentPhysical.CollisionLayers;
+					bone.CollisionMask = parentPhysical.CollisionMask;
+				}
+			}
+		}
+
 		s.Active = true;
 		s.PhysicalBonesStartSimulation();
 
@@ -706,6 +722,9 @@ public sealed partial class PolytorianModel : CharacterModel
 				return;
 			case CharacterModelBlendEnum.StrafeY:
 				_targetStrafeY = blendValue;
+				return;
+			case CharacterModelBlendEnum.ClimbSpeed:
+				AnimTree?.Set("parameters/StateMachine/Climb/TimeScale/scale", blendValue);
 				return;
 		}
 
