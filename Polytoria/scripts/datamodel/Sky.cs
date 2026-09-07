@@ -44,7 +44,9 @@ public sealed partial class Sky : Instance
 		{
 			SkyboxAsset? previous = _skybox;
 			_skybox?.Changed -= OnSkyboxChanged;
+			previous?.UnlinkFrom(this);
 			_skybox = value;
+			_skybox?.LinkTo(this);
 			_skybox?.Changed += OnSkyboxChanged;
 
 			BeginTransition(previous, value);
@@ -55,7 +57,7 @@ public sealed partial class Sky : Instance
 
 	private void BeginTransition(SkyboxAsset? from, SkyboxAsset? to)
 	{
-		if (from is GradientSkyboxAsset && to is GradientSkyboxAsset toGrad && _transitionDuration > 0f)
+		if (Root.IsLoaded && from is GradientSkyboxAsset && to is GradientSkyboxAsset toGrad && _transitionDuration > 0f)
 		{
 			_transitionTarget = toGrad;
 			_transitionElapsed = 0f;
@@ -239,7 +241,7 @@ public sealed partial class Sky : Instance
 
 	public override void InitOverrides()
 	{
-		ApplyPreset(LightingPreset.Sunset1);
+		ApplyPreset(LightingPreset.Day3);
 		base.InitOverrides();
 	}
 
