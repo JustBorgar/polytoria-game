@@ -26,6 +26,7 @@ public sealed partial class Player : NPC
 {
 	private const double MaxAFKTime = 60 * 15;
 	private const float CameraHeight = 2f;
+	private const float StaminaRecovery = 0.6f;
 	public const string CreatorHeadScene = "res://scenes/creator/livecollab/head.tscn";
 	public const string BubbleChatScene = "res://scenes/client/spatial/chat/bubble_chat.tscn";
 	public const string BadgeImageDirPath = "res://assets/textures/client/ui/playerlist/badges/";
@@ -45,8 +46,8 @@ public sealed partial class Player : NPC
 	private float _stamina = 0;
 	private float _maxStamina = 3;
 	private bool _useStamina = true;
-	private float _staminaRegen = 1.2f;
-	private float _staminaBurn = 1.2f;
+	private float _staminaRegen = 1f / 1.2f;
+	private float _staminaBurn = 1f / 1.2f;
 	private bool _keepInventory = false;
 	private bool _useHeadTurning = false;
 	private int _userID;
@@ -61,6 +62,7 @@ public sealed partial class Player : NPC
 	internal bool SprintOverride = false;
 	private float _pingStartTime = 0;
 	internal bool SprintHoldAgain = false;
+	internal bool StaminaDrained = false;
 
 	private double _afkTimer;
 
@@ -614,10 +616,12 @@ public sealed partial class Player : NPC
 	internal void AddStaminaTick(double delta)
 	{
 		if (!UseStamina) { return; }
-		Stamina += (float)(delta * StaminaRegen);
+		float regenRate = StaminaRegen * (StaminaDrained ? StaminaRecovery : 1f);
+		Stamina += (float)(delta * regenRate);
 		if (Stamina > MaxStamina)
 		{
 			Stamina = MaxStamina;
+			StaminaDrained = false;
 		}
 	}
 
@@ -625,9 +629,10 @@ public sealed partial class Player : NPC
 	{
 		if (!UseStamina) { return; }
 		Stamina -= (float)(delta * StaminaBurn);
-		if (Stamina < 0)
+		if (Stamina <= 0)
 		{
 			Stamina = 0;
+			StaminaDrained = true;
 		}
 	}
 
@@ -757,7 +762,7 @@ public sealed partial class Player : NPC
 		}
 
 		// Stop animation on move
-		if (IsMoving && !AllowAnimationWhileMoving)
+		if ((IsMoving || !IsOnGround) && !AllowAnimationWhileMoving)
 		{
 			Character?.Animator?.StopAnimation();
 		}

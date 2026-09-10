@@ -104,17 +104,22 @@ public class DefaultMovement : IPlayerMovement
 			// Sprint/Stamina
 			if (sprinting && moveDirection != Vector3.Zero)
 			{
-				if (Target.Stamina > 0 || !Target.UseStamina)
+				bool canSprint = !Target.UseStamina || (Target.Stamina > 0 && !Target.StaminaDrained);
+				if (canSprint)
 				{
 					gdWalkSpeed = Target.SprintSpeed;
+					Target.RemoveStaminaTick(delta);
 				}
 				else
 				{
 					sprinting = false;
-					Target.SprintHoldAgain = true;
+					Target.SprintOverride = false;
+					if (!Target.StaminaDrained)
+					{
+						Target.SprintHoldAgain = true;
+					}
+					Target.AddStaminaTick(delta);
 				}
-
-				Target.RemoveStaminaTick(delta);
 			}
 			else
 			{
