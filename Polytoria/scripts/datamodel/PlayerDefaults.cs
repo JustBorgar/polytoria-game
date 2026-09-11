@@ -140,7 +140,7 @@ public sealed partial class PlayerDefaults : HiddenBase
 		get => _maxStamina;
 		set
 		{
-			_maxStamina = value;
+			_maxStamina = Mathf.Max(value, 0f);
 			OnPropertyChanged();
 		}
 	}
@@ -151,7 +151,7 @@ public sealed partial class PlayerDefaults : HiddenBase
 		get => _staminaRegen;
 		set
 		{
-			_staminaRegen = value;
+			_staminaRegen = Mathf.Max(value, 0f);
 			OnPropertyChanged();
 		}
 	}
@@ -162,7 +162,7 @@ public sealed partial class PlayerDefaults : HiddenBase
 		get => _staminaBurn;
 		set
 		{
-			_staminaBurn = value;
+			_staminaBurn = Mathf.Max(value, 0f);
 			OnPropertyChanged();
 		}
 	}
@@ -184,7 +184,7 @@ public sealed partial class PlayerDefaults : HiddenBase
 		get => _exhaustionRegen;
 		set
 		{
-			_exhaustionRegen = value;
+			_exhaustionRegen = Mathf.Max(value, 0f);
 			OnPropertyChanged();
 		}
 	}
