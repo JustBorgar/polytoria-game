@@ -58,7 +58,8 @@ public sealed partial class World : Instance
 
 	public PTSignal Loaded { get; private set; } = new();
 
-	[ScriptProperty, Attributes.Obsolete("Use 'Hooks.Updated' instead.")]
+	[Attributes.Obsolete("Use 'Hooks.Updated' instead.")]
+	[ScriptProperty]
 	public PTSignal<double> Rendered { get; private set; } = new();
 
 	[ScriptProperty, Attributes.Obsolete("Use 'ScriptService.IsLocalTest' instead.")]
@@ -208,13 +209,13 @@ public sealed partial class World : Instance
 		}
 	}
 
-	[ScriptProperty, Attributes.Obsolete("Use 'Players.PlayersCount' instead.")]
+	[ScriptProperty, Attributes.Obsolete("Use Players.PlayersCount instead")]
 	public int PlayersConnected => Players.PlayersCount;
 
 	[ScriptProperty]
 	public int InstanceCount { get; private set; } = 0;
 
-	[ScriptProperty, Attributes.Obsolete("Use 'InstanceCount' instead.")]
+	[ScriptProperty, Attributes.Obsolete("Use InstanceCount instead")]
 	public int LocalInstanceCount => InstanceCount;
 
 	[ScriptMethod]
