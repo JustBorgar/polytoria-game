@@ -193,7 +193,7 @@ public sealed partial class Player : NPC
 		get => _staminaRegen;
 		set
 		{
-			_staminaRegen = Mathf.Max(value, 0f);
+			_staminaRegen = value;
 			OnPropertyChanged();
 		}
 	}
@@ -226,7 +226,7 @@ public sealed partial class Player : NPC
 		get => _exhaustionRegen;
 		set
 		{
-			_exhaustionRegen = Mathf.Max(value, 0f);
+			_exhaustionRegen = value;
 			OnPropertyChanged();
 		}
 	}
