@@ -47,7 +47,7 @@ public partial class UIHealthbar : Control
 			_staminaBar.Visible = localplayer.UseStamina;
 			_staminaBar.Value = localplayer.Stamina;
 			_staminaBar.MaxValue = localplayer.MaxStamina;
-			_staminaBar.SelfModulate = localplayer.StaminaDrained ? _staminaOutColor : _staminaFullColor;
+			_staminaBar.SelfModulate = localplayer.IsExhausted ? _staminaOutColor : _staminaFullColor;
 
 			_healthBar.Value = health;
 			_healthBar.MaxValue = maxHealth;
